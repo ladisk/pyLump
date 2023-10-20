@@ -1,0 +1,6 @@
+numpy
+py
+pytest
+scipy
+matplotlib
+pyExSi
