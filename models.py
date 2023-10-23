@@ -9,6 +9,8 @@ Classes:
 
 import numpy as np
 import scipy
+#from concurrent.futures import ProcessPoolExecutor
+#import functools
 
 
 
@@ -20,6 +22,12 @@ _METHODS = ["auto", "direct", "fft"]
 _DOMAINS = ["f", "t"]
 
 
+# def _matrix_inverse_multi(M, K, C, omega_slice):
+#     FRF_matrix = np.zeros((M.shape[0], M.shape[0], len(omega_slice)), dtype="complex128")
+#     for i, omega_i in enumerate(omega_slice):
+#         FRF_matrix[:, :, i] = scipy.linalg.inv(K - omega_i**2 * M + 1j*omega_i*C)
+
+#     return FRF_matrix
 
 class Model:
     """
@@ -30,25 +38,27 @@ class Model:
         """
         Initiates the data class:
 
-        :param n_dof: Number of degrees of freedom - number of masses.
-        :type n_dof: int
-        :param mass: Weight of connected masses in kg.
+        Parameters
+        ----------
+        n_dof : int
+            Number of degrees of freedom - number of masses.
+        mass : int, float, array, list, tuple
+            Weight of connected masses in kg.
             int, float - all masses have the same weight.
             array, list, tuple of length n_dof - specify different weight for each mass in order.
-        :type mass: int, float, array, list, tuple
-        :param stiffness: Stiffness of springs that are connecting masses.
+        stiffness : int, float, array, list, tuple
+            Stiffness of springs that are connecting masses.
             int, float - all springs have the same stiffness.
-            array, list, tuple of length n_dof or n_dof+1, depending on boundary condition - 
+            array, list, tuple of length n_dof or n_dof+1, depending on boundary condition -
             specify different stiffness for each spring in order.
-        :type stiffness: int, float, array, list, tuple
-        :param damping: Damping coefficient of dampers that are connecting masses.
+        damping : int, float, array, list, tuple
+            Damping coefficient of dampers that are connecting masses.
             int, float - all dampers have the same daming coefficient.
-            array, list, tuple of length n_dof or n_dof+1, depending on boundary condition - 
+            array, list, tuple of length n_dof or n_dof+1, depending on boundary condition -
             specify different damping coefficients for each damper in order.
-        :type damping: int, float, array, list, tuple
-        :param boundaries: Boundary conditions: ``"free"``, ``"both"``, ``"left"``, ``"right"`` - which side the masses 
+        boundaries : str, optional
+            Boundary conditions: ``"free"``, ``"both"``, ``"left"``, ``"right"`` - which side the masses
             are connected to rigid surface.
-        :type boundaries: str
         """
         # dof:
         if isinstance(n_dof, int):
@@ -137,8 +147,10 @@ class Model:
         """
         Fills stiffness and damping matrix based on boundary conditions.
 
-        :param value_array: Array of values to fill the matrix with, based on boundary conditions.
-        :type value_array: array, list
+        Parameters
+        ----------
+        value_array : array, list
+            Array of values to fill the matrix with, based on boundary conditions.
         """
 
         matrix = np.zeros((self.n_dof, self.n_dof))
@@ -192,7 +204,7 @@ class Model:
         B[-self.n_dof:, -self.n_dof:] = -self.M
 
         # Modal analysis:
-        AB_eig = np.linalg.inv(A) @ B
+        AB_eig = scipy.linalg.inv(A) @ B
         val, vec = scipy.linalg.eig(AB_eig)
 
         roots = -val[1::2][::-1]
@@ -231,8 +243,10 @@ class Model:
         """
         Get mass (M) matrix of the system.
 
-        :return: Mass matrix array of shape ``(n_dof, n_dof)``.
-        :rtype: ndarray
+        Returns
+        -------
+        ndarray
+            Mass matrix array of shape ``(n_dof, n_dof)``.
         """
         return self.M
 
@@ -241,8 +255,10 @@ class Model:
         """
         Get stiffness (K) matrix of the system.
 
-        :return: Stiffness matrix array of shape ``(n_dof, n_dof)``.
-        :rtype: ndarray
+        Returns
+        -------
+        ndarray
+            Stiffness matrix array of shape ``(n_dof, n_dof)``.
         """
         return self.K
 
@@ -251,8 +267,10 @@ class Model:
         """
         Get damping (C) matrix of the system.
 
-        :return: Damping matrix array of shape ``(n_dof, n_dof)``.
-        :rtype: ndarray
+        Returns
+        -------
+        ndarray
+            Damping matrix array of shape ``(n_dof, n_dof)``.
         """
         return self.C
 
@@ -261,8 +279,10 @@ class Model:
         """
         Get state-space model eigen values and their conjugate pairs.
 
-        :return: Tuple of eigen values array and their conjugate pairs array.
-        :rtype: tuple(ndarray)
+        Returns
+        -------
+        tuple(ndarray)
+            Tuple of eigen values array and their conjugate pairs array.
         """
 
         if self.eig_calculated:
@@ -276,8 +296,10 @@ class Model:
         """
         Get state-space model mass-normalized eigen vectors and their conjugate pairs.
 
-        :return: Tuple of mass-normalized eigen vectors array and their conjugate pairs array.
-        :rtype: tuple(ndarray)
+        Returns
+        -------
+        tuple(ndarray)
+            Tuple of mass-normalized eigen vectors array and their conjugate pairs array.
         """
         
         if self.eig_calculated:
@@ -291,8 +313,10 @@ class Model:
         """
         Get viscous damping ratios of the system.
 
-        :return: Array of shape ``(n_dof,)`` of viscous damping ratios of the system.
-        :rtype: ndarray
+        Returns
+        -------
+        ndarray
+            Array of shape ``(n_dof,)`` of viscous damping ratios of the system.
         """
         
         if self.eig_calculated:
@@ -306,8 +330,10 @@ class Model:
         """
         Get eigen frequencies of the system (in Hz).
 
-        :return: Array of shape ``(n_dof,)`` of eigen frequencies (in Hz).
-        :rtype: ndarray
+        Returns
+        -------
+        ndarray
+            Array of shape ``(n_dof,)`` of eigen frequencies (in Hz).
         """
 
         if self.eig_freq.size == 0:
@@ -319,18 +345,29 @@ class Model:
         return self.eig_freq
     
 
-    def get_FRF_matrix(self, freq, frf_method="f"):
+    def get_FRF_matrix(self, freq, frf_method="f", **kwargs):
         """
         Get FRF matrix of the system.
 
-        :param freq: Frequency array (in Hz) at which the FRF values are calculated.
-        :param frf_method: Method of calculating the FRF matrix:
+        Parameters
+        ----------
+        freq : ndarray
+            Frequency array (in Hz) at which the FRF values are calculated.
+
+        frf_method : str 
+            Method of calculating the FRF matrix:
             ``"f"`` - frequency domain, based on impedance inverse or 
-            ``"s"`` - state space domain, based on state-space model parameters
-        :type frf_method: str
-        :type freq: ndarray
-        :return: FRF matrix array of shape of shape ``(n_dof, n_dof, frequency_series)``.
-        :rtype: ndarray
+            ``"s"`` - state space domain, based on state-space model parameters.
+
+        Keyword arguments
+        -----------------
+        n_modes : int
+            Number of modes used for calculation of FRF matrix via state-space method (``frf_method="s"``) by modes superpostion.
+
+        Returns
+        -------
+        ndarray
+            FRF matrix array of shape of shape ``(n_dof, n_dof, frequency_series)``.
         """
 
         if not (frf_method in _FRF_METHODS):
@@ -344,10 +381,27 @@ class Model:
         FRF_matrix = np.zeros([self.n_dof, self.n_dof, len(omega)], dtype="complex128")
 
         if frf_method == "f":
+            # if multi:
+            #     omega_slices = np.array_split(omega, 4)
+
+            #     with Pool(processes=4) as pool:
+            #        results = pool.starmap(_matrix_inverse_multi, [(self.M, self.K, self.C, omega_slice) for omega_slice in omega_slices])
+            #     FRF_matrix = np.concatenate(results, axis=2)
+    
+                
+            # else:
+            #     for i, omega_i in enumerate(omega):
+            #         FRF_matrix[:,:,i] = scipy.linalg.inv(self.K - omega_i**2 * self.M + 1j*omega_i*self.C)
+
             for i, omega_i in enumerate(omega):
                 FRF_matrix[:,:,i] = scipy.linalg.inv(self.K - omega_i**2 * self.M + 1j*omega_i*self.C)
 
         elif frf_method == "s":
+            n_modes = kwargs.get("n_modes", None)
+            if n_modes is None:
+                n_modes = self.n_dof  # TODO: set default
+
+
             if not self.eig_calculated:
                  self._ini_eig_val_vec()
 
@@ -358,33 +412,47 @@ class Model:
 
             for i in range(self.n_dof):
                 for j in range(self.n_dof):
-                    FRF_ij = (vec[i]*vec[j])[:, None] / (1j*omega[None, :] - val[:, None])
-                    FRF_ij += (vec_conj[i]*vec_conj[j])[:, None] / (1j*omega[None, :] - val_conj[:, None])
+                    FRF_ij = (vec[i][:n_modes]*vec[j][:n_modes])[:, None] / (1j*omega[None, :] - val[:n_modes, None])
+                    FRF_ij += (vec_conj[i][:n_modes]*vec_conj[j][:n_modes])[:, None] / (1j*omega[None, :] - val_conj[:n_modes, None])
                     FRF_matrix[i, j] = np.sum(FRF_ij, axis=0)
 
         return FRF_matrix
     
 
-    def get_h_matrix(self, freq, frf_method="f", return_t_axis=False):
+    def get_h_matrix(self, freq, frf_method="f", return_t_axis=False, **kwargs):
         """
         Get h (impulse response function) matrix of the system.
 
-        :param freq: frequency array at which the FRF values are calculated.
-        :type freq: ndarray
-        :param frf_method: Method of calculating the FRF matrix:
+        Parameters
+        ----------
+        freq : ndarray
+            Frequency array (in Hz) at which the FRF values are calculated.
+        frf_method : str 
+            Method of calculating the FRF matrix:
             ``"f"`` - frequency domain, based on impedance inverse or 
-            ``"s"`` - state space domain, based on state-space model parameters
-        :type frf_method: str
-        :param return_t_axis: True if you want to return the time axis.
-        :type return_t_axis: bool
-        :return: Impulse response (h) matrix of shape ``(n_dof, n_dof, time_series)`` or tuple based on requested returns.
-        :rtype: ndarray or tuple(ndarray)
+            ``"s"`` - state space domain, based on state-space model parameters.
+        return_t_axis : bool, optional
+            True if you want to return the time axis.
+
+        Keyword arguments
+        -----------------
+        n_modes : int
+            Number of modes used for calculation of FRF matrix via state-space method (``frf_method="s"``) by modes superpostion.
+
+        Returns
+        -------
+        ndarray or tuple(ndarray)
+            Impulse response (h) matrix of shape ``(n_dof, n_dof, time_series)`` or tuple based on requested returns.
         """
         if isinstance(freq, list):
             freq = np.array(freq)
 
+        n_modes = kwargs.get("n_modes", None)
+        if n_modes is None:
+            n_modes = self.n_dof  # TODO: set default
+
         # get FRF matrix:
-        FRF_matrix = self.get_FRF_matrix(freq, frf_method=frf_method)
+        FRF_matrix = self.get_FRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
 
         # obtain h matrix (impulse response function) matrix:
         h_matrix = np.fft.irfft(FRF_matrix)
@@ -398,50 +466,57 @@ class Model:
 
 
     def get_response(self, exc_dof, exc, sampling_rate, resp_dof=None, domain="f", frf_method="f", 
-                     mode="full", method="auto", return_matrix=False, return_t_axis=False, return_f_axis=False):
+                     return_matrix=False, return_t_axis=False, return_f_axis=False, **kwargs):
         """
         Get response time series.
 
-        :param exc_dof: Degrees of freedom (masses) where the system is excited.
-        :type exc_dof: ndarray, list
-        :param exc: Excitation time array 1D (one excitation DOF) or 2D (multiple excitation DOFs).
+        Parameters
+        ----------
+        exc_dof : ndarray, list
+            Degrees of freedom (masses) where the system is excited.
+        exc : ndarray
+            Excitation time array 1D (one excitation DOF) or 2D (multiple excitation DOFs).
             1D shape (single excitation DOF): (time series)
             2D shape (multiple excitation DOFs): (number of DOFs, time series)
-        :type exc: ndarray
-        :param sampling_rate: Sampling rate of excitation time signals.
-        :type sampling_rate: int
-        :param resp_dof: Degrees of freedom (masses) where the response is calculated. If None - responses of all masses are caluclated.
-        :type resp_dof: ndarray, list
-        :param frf_method: Method of calculating the FRF matrix:
-            ``"f"`` - frequency domain, based on impedance inverse or 
+        sampling_rate : int
+            Sampling rate of excitation time signals.
+        resp_dof : ndarray, list, optional
+            Degrees of freedom (masses) where the response is calculated. If None - responses of all masses are caluclated.
+        frf_method : str, optional
+            Method of calculating the FRF matrix:
+            ``"f"`` - frequency domain, based on impedance inverse or
             ``"s"`` - state space domain, based on state-space model parameters
-        :type frf_method: str
-        :param domain: Domain used for calculation: ``"f"`` - frequency domain multiplication (via FRF matrix) or 
+        domain : str, optional
+            Domain used for calculation: ``"f"`` - frequency domain multiplication (via FRF matrix) or
             ``"t"`` - time domain convolution (via impulse response matrix).
-        :param mode: A string indicating the size of the output (``"full"``, ``"valid"``, ``"same"``).
-        :type mode: str
-        :param method: A string indicating which method to use to calculate the convolution (``"auto"``, ``"direct"``, ``"fft"``).
-        :type method: str
-        :param return_matrix: True if you want to return the FRF matrix (``domain="f"``) or impulse response matrix (``domain="t"``) 
+        return_matrix : bool, optional
+            True if you want to return the FRF matrix (``domain="f"``) or impulse response matrix (``domain="t"``)
             used for calculation.
-        :type return_matrix: bool
-        :param return_t_axis: True if you want to return the time axis.
-        :type return_t_axis: bool
-        :param return_f_axis: True if you want to return the frequency axis.
-        :type return_f_axis: bool
-        :return: Response time signals array of shape ``(len(resp_dof), time_series)`` or tuple based on requested returns.
-        :rtype: ndarray or tuple(ndarray)
+        return_t_axis : bool, optional
+            True if you want to return the time axis.
+        return_f_axis : bool, optional
+            True if you want to return the frequency axis.
+
+        Keyword arguments
+        -----------------
+        n_modes : int
+            Number of modes used for calculation of FRF matrix via state-space method (``frf_method="s"``) by modes superpostion.
+        mode : str
+            Used for convolution calculation in time domain (``domain="t"``). A string indicating the size of the output 
+            (``"full"``, ``"valid"``, ``"same"``).
+        method : str
+            Used for convolution calculation in time domain (``domain="t"``). A string indicating which method to use to 
+            calculate the convolution (``"auto"``, ``"direct"``, ``"fft"``).
+        
+        Returns
+        -------
+        ndarray or tuple(ndarray)
+            Response time signals array of shape ``(len(resp_dof), time_series)`` or tuple based on requested returns.
         """
 
         # check domain:
         if not (domain in _DOMAINS):
             raise Exception("Wrong domain calculation type type given. Can be one of %s" % _DOMAINS)
-        
-        # check mode and method:
-        if not (mode in _MODES):
-            raise Exception("Wrong mode type given. Can be one of %s" % _MODES)
-        if not (method in _METHODS):
-            raise Exception("Wrong method type given. Can be one of %s" % _METHODS)
         
         # check exc_dof:
         if isinstance(exc_dof, list):
@@ -473,11 +548,16 @@ class Model:
         # freq array:
         freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)
 
+        # number of modes for s frf_method:
+        n_modes = kwargs.get("n_modes", None)
+        if n_modes is None:
+            n_modes = self.n_dof  # TODO: set default
+
         # calcualte response:
         if domain == "f":
             EXC = np.fft.rfft(exc)  # TODO: normiranje
             RESP = np.zeros((resp_dof.shape[0], freq.shape[0]), dtype="complex128")
-            matrix = self.get_FRF_matrix(freq, frf_method=frf_method)
+            matrix = self.get_FRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
             # calculate response in frequency domain:
             for i in range(EXC.shape[1]):
                 RESP[:,i] = matrix[:,:,i][np.ix_(resp_dof, exc_dof)] @ EXC[:,i]
@@ -485,12 +565,21 @@ class Model:
             resp = np.fft.irfft(RESP)  # TODO: normiranje
 
         elif domain == "t":
+            # check mode and method:
+            mode = kwargs.get("mode", "full")
+            method = kwargs.get("method", "auto")
+
+            if not (mode in _MODES):
+                raise Exception("Wrong mode type given. Can be one of %s" % _MODES)
+            if not (method in _METHODS):
+                raise Exception("Wrong method type given. Can be one of %s" % _METHODS)
+
             resp = np.zeros((resp_dof.shape[0], exc.shape[1]), dtype=float)
-            h_matrix = self.get_h_matrix(freq, frf_method=frf_method)
+            matrix = self.get_h_matrix(freq, frf_method=frf_method, n_modes=n_modes)
             # calculate time domain response:
             for i in range(resp_dof.shape[0]):
                 for j in range(exc_dof.shape[0]):
-                    resp[i] += scipy.signal.convolve(h_matrix[resp_dof[i], exc_dof[j], :], exc[j], 
+                    resp[i] += scipy.signal.convolve(matrix[resp_dof[i], exc_dof[j], :], exc[j], 
                                                      mode=mode, method=method)[:exc.shape[1]]
 
         if return_t_axis:
