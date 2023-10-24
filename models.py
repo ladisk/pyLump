@@ -345,7 +345,7 @@ class Model:
         return self.eig_freq
     
 
-    def get_FRF_matrix(self, freq, frf_method="f", **kwargs):
+    def get_FRF_matrix(self, freq, frf_method="f", einsum=False, **kwargs):
         """
         Get FRF matrix of the system.
 
@@ -378,8 +378,6 @@ class Model:
 
         omega = 2 * np.pi * freq
 
-        FRF_matrix = np.zeros([self.n_dof, self.n_dof, len(omega)], dtype="complex128")
-
         if frf_method == "f":
             # if multi:
             #     omega_slices = np.array_split(omega, 4)
@@ -392,6 +390,8 @@ class Model:
             # else:
             #     for i, omega_i in enumerate(omega):
             #         FRF_matrix[:,:,i] = scipy.linalg.inv(self.K - omega_i**2 * self.M + 1j*omega_i*self.C)
+
+            FRF_matrix = np.zeros([self.n_dof, self.n_dof, len(omega)], dtype="complex128")
 
             for i, omega_i in enumerate(omega):
                 FRF_matrix[:,:,i] = scipy.linalg.inv(self.K - omega_i**2 * self.M + 1j*omega_i*self.C)
@@ -411,11 +411,29 @@ class Model:
             val = self.eig_val[0]
             val_conj = self.eig_val[1]
 
-            for i in range(self.n_dof):
-                for j in range(self.n_dof):
-                    FRF_ij = (vec[i][:n_modes]*vec[j][:n_modes])[:, None] / (1j*omega[None, :] - val[:n_modes, None])
-                    FRF_ij += (vec_conj[i][:n_modes]*vec_conj[j][:n_modes])[:, None] / (1j*omega[None, :] - val_conj[:n_modes, None])
-                    FRF_matrix[i, j] = np.sum(FRF_ij, axis=0)
+            den = 1 / (1j*omega[None, :] - val[:n_modes, None])
+            den_conj = 1 / (1j*omega[None, :] - val_conj[:n_modes, None])
+
+            if einsum:
+                print("einsum")
+                # everything at once (slower):
+                #FRF_matrix = np.einsum('ij,kj,j...->ik...', vec[:,:n_modes], vec[:,:n_modes], den)              
+                #FRF_matrix += np.einsum('ij,kj,j...->ik...', vec_conj[:,:n_modes], vec_conj[:,:n_modes], den_conj)
+
+                # 2 steps split:
+                first_step = np.einsum('ij,kj->ikj', vec[:,:n_modes], vec[:,:n_modes])
+                FRF_matrix = np.einsum('ijk,k...->ij...', first_step, den)
+                FRF_matrix += np.einsum('ijk,k...->ij...', np.conj(first_step), den_conj)
+            else:
+                print("for loop")
+
+                FRF_matrix = np.zeros([self.n_dof, self.n_dof, len(omega)], dtype="complex128")
+
+                for i in range(self.n_dof):
+                    for j in range(self.n_dof):
+                        FRF_ij = (vec[i][:n_modes]*vec[j][:n_modes])[:, None] * den
+                        FRF_ij += (vec_conj[i][:n_modes]*vec_conj[j][:n_modes])[:, None] * den_conj
+                        FRF_matrix[i, j] = np.sum(FRF_ij, axis=0)
 
         return FRF_matrix
     
