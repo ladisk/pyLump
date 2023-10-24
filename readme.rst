@@ -55,6 +55,6 @@ We can calculate the systems response based on known excitation the following wa
         exc,
         sampling_rate,
         resp_dof
-        )
+    )
 
 .. _documentation: https://pyfrf.readthedocs.io/en/latest/

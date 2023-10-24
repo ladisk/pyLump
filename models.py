@@ -397,11 +397,12 @@ class Model:
                 FRF_matrix[:,:,i] = scipy.linalg.inv(self.K - omega_i**2 * self.M + 1j*omega_i*self.C)
 
         elif frf_method == "s":
+            # n_modes kwarg:
             n_modes = kwargs.get("n_modes", None)
             if n_modes is None:
                 n_modes = self.n_dof  # TODO: set default
 
-
+            # initialize eigen values and vectors:
             if not self.eig_calculated:
                  self._ini_eig_val_vec()
 
@@ -447,9 +448,8 @@ class Model:
         if isinstance(freq, list):
             freq = np.array(freq)
 
+        # n_modes kwarg:
         n_modes = kwargs.get("n_modes", None)
-        if n_modes is None:
-            n_modes = self.n_dof  # TODO: set default
 
         # get FRF matrix:
         FRF_matrix = self.get_FRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
@@ -548,10 +548,8 @@ class Model:
         # freq array:
         freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)
 
-        # number of modes for s frf_method:
+        # # n_modes kwarg:
         n_modes = kwargs.get("n_modes", None)
-        if n_modes is None:
-            n_modes = self.n_dof  # TODO: set default
 
         # calcualte response:
         if domain == "f":

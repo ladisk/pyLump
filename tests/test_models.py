@@ -148,7 +148,6 @@ def test_h():
     np.testing.assert_allclose(model.get_h_matrix(freq, frf_method="s"), np.fft.irfft(frf), rtol=1e-5)
     
     
-
 def test_response():
     model = models.Model(3, 0.1, 10, 0.01, boundaries="both")
 
@@ -188,7 +187,6 @@ def test_response():
     np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="t", frf_method="s"), 
                                np.fft.irfft(frf[0,:]), rtol=1e-9)
     
-
 
 
 if __name__ == '__mains__':

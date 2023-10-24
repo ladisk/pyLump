@@ -169,6 +169,9 @@ Method used to calculate the FRF matrix:
   * ``"f"`` (default): frequency domain, via impedance inverse.
   * ``"s"``: state space domain, via state-space model parameters.
 
+.. note::
+  If the selected method for FRF calculation is the state space domain method (``frf_method="s"``), we can provide an optional keyword argument 
+  ``n_modes`` to specify the number of modes used in FRF calculation via mode superposition method. If not specified, all the modes are used.
 
 Impulse response functions
 ----------------------------
@@ -189,6 +192,10 @@ Method used to calculate the FRF matrix, from which the impulse response functio
 
   * ``"f"`` (default): frequency domain, via impedance inverse.
   * ``"s"``: state space domain, via state-space model parameters.
+
+.. note::
+  If the selected method for FRF calculation is the state space domain method (``frf_method="s"``), we can provide an optional keyword argument 
+  ``n_modes`` to specify the number of modes used in FRF calculation via mode superposition method. If not specified, all the modes are used.
 
 ``return_t_axis`` argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -241,12 +248,20 @@ Method used to calculate the response (frequency or time domain):
   * ``"f"`` (default): multiplication in the frequency domain.
   * ``"t"``: convolution in time domain.
 
+.. note::
+  If we choose the time domain response calculation (``domain="t"``), we can also use the two additional keyword arguments ``mode`` and 
+  ``method``, which control the convolution calculation. See :doc:`code documentation <code_documentation>` for further info.
+
 ``frf_method`` argument
 ~~~~~~~~~~~~~~~~~~~~~~~
 Method used to calculate the FRF matrix:
 
   * ``"f"`` (default): frequency domain, via impedance inverse.
   * ``"s"``: state space domain, via state-space model parameters.
+
+.. note::
+  If the selected method for FRF calculation is the state space domain method (``frf_method="s"``), we can provide an optional keyword argument 
+  ``n_modes`` to specify the number of modes used in FRF calculation via mode superposition method. If not specified, all the modes are used.
 
 ``return_matrix`` argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -261,14 +276,6 @@ If ``True``, returns the time axis of response and excitation signals.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 If ``True``, returns the frequnecy axis of the FRF matrix.
 
-
 .. note::
   If any of the ``return_matrix``, ``return_t_axis``, ``return_f_axis`` is ``True``, the result of the method is a tuple with all 
   the requested returned items.
-
-.. note::
-  We can also get the response via time domain by using the argument ``domain="t"``. In that case we can also use the two additional 
-  arguments ``mode`` and ``method``, which control the convolution calculation. See :doc:`code documentation <code_documentation>` for
-  further info.
-
-
