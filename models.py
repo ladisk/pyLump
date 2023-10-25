@@ -34,7 +34,8 @@ class Model:
     Multi Degree of Freedom Models (mass-spring-damper).
     """
 
-    def __init__(self, n_dof, mass, stiffness, damping, boundaries="both"):
+    def __init__(self, n_dof:int, mass:int|np.ndarray, stiffness:int|np.ndarray, 
+                 damping:int|np.ndarray, boundaries:str="both"):
         """
         Initiates the data class:
 
@@ -143,7 +144,7 @@ class Model:
         self.C = self._fill_matrix(value_array=self.c)
 
 
-    def _fill_matrix(self, value_array):
+    def _fill_matrix(self, value_array:np.ndarray) -> np.ndarray:
         """
         Fills stiffness and damping matrix based on boundary conditions.
 
@@ -239,7 +240,7 @@ class Model:
         
 
 
-    def get_mass_matrix(self):
+    def get_mass_matrix(self) -> np.ndarray:
         """
         Get mass (M) matrix of the system.
 
@@ -251,7 +252,7 @@ class Model:
         return self.M
 
 
-    def get_stiffness_matrix(self):
+    def get_stiffness_matrix(self) -> np.ndarray:
         """
         Get stiffness (K) matrix of the system.
 
@@ -263,7 +264,7 @@ class Model:
         return self.K
 
 
-    def get_damping_matrix(self):
+    def get_damping_matrix(self) -> np.ndarray:
         """
         Get damping (C) matrix of the system.
 
@@ -275,7 +276,7 @@ class Model:
         return self.C
 
 
-    def get_eig_val(self):
+    def get_eig_val(self) -> tuple[np.ndarray]:
         """
         Get state-space model eigen values and their conjugate pairs.
 
@@ -292,7 +293,7 @@ class Model:
             return self.eig_val
 
 
-    def get_eig_vec(self):
+    def get_eig_vec(self) -> tuple[np.ndarray]:
         """
         Get state-space model mass-normalized eigen vectors and their conjugate pairs.
 
@@ -309,7 +310,7 @@ class Model:
             return self.eig_vec
         
 
-    def get_damping_ratios(self):
+    def get_damping_ratios(self) -> np.ndarray:
         """
         Get viscous damping ratios of the system.
 
@@ -326,7 +327,7 @@ class Model:
             return self.v_damping
     
     
-    def get_eig_freq(self):
+    def get_eig_freq(self) -> np.ndarray:
         """
         Get eigen frequencies of the system (in Hz).
 
@@ -345,7 +346,8 @@ class Model:
         return self.eig_freq
     
 
-    def get_FRF_matrix(self, freq, frf_method="f", **kwargs):
+    def get_FRF_matrix(self, freq:np.ndarray, frf_method:str="f", 
+                       **kwargs) -> np.ndarray:
         """
         Get FRF matrix of the system.
 
@@ -434,7 +436,8 @@ class Model:
         return FRF_matrix
     
 
-    def get_h_matrix(self, freq, frf_method="f", return_t_axis=False, **kwargs):
+    def get_h_matrix(self, freq:np.ndarray, frf_method:str="f", return_t_axis:bool=False, 
+                     **kwargs) -> np.ndarray | tuple[np.ndarray]:
         """
         Get h (impulse response function) matrix of the system.
 
@@ -479,8 +482,10 @@ class Model:
         return h_matrix
 
 
-    def get_response(self, exc_dof, exc, sampling_rate, resp_dof=None, domain="f", frf_method="f", 
-                     return_matrix=False, return_t_axis=False, return_f_axis=False, **kwargs):
+    def get_response(self, exc_dof:np.ndarray|list, exc:np.ndarray, sampling_rate:int, 
+                     resp_dof:np.ndarray=None, domain:str="f", frf_method:str="f", 
+                     return_matrix:bool=False, return_t_axis:bool=False, return_f_axis:bool=False, 
+                     **kwargs) -> np.ndarray|tuple[np.ndarray]:
         """
         Get response time series.
 
