@@ -115,3 +115,5 @@ autodoc_default_options = {
     'special-members': '__init__',
     'undoc-members': True,
 }
+
+autodoc_typehints = "none"
