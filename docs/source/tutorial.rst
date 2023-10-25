@@ -156,7 +156,7 @@ To get the FRF matrix of the system we call the following method:
 
 .. code:: python
 
-  FRF_matrix = a.get_FRF_matrix(freq, frf_method="f")
+  FRF_matrix = a.get_FRF_matrix(freq, frf_method="f", **kwargs)
 
 ``freq`` argument
 ~~~~~~~~~~~~~~~~~
@@ -180,7 +180,7 @@ To get the impulse response (h) matrix of the system we call the following metho
 
 .. code:: python
 
-  h_matrix = a.get_h_matrix(freq, frf_method="f", return_t_axis=False)
+  h_matrix = a.get_h_matrix(freq, frf_method="f", return_t_axis=False, **kwargs)
 
 ``freq`` argument
 ~~~~~~~~~~~~~~~~~
@@ -221,7 +221,8 @@ To obtain the systems response to known excitation we can use the ``get_response
     frf_method="f",
     return_matrix=False,
     return_t_axis=False,
-    return_f_axis=False
+    return_f_axis=False,
+    **kwargs
   )
 
 ``exc_dof`` argument
