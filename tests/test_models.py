@@ -143,9 +143,9 @@ def test_h():
         frf[:,:,i] = scipy.linalg.inv(K - wi**2 * M + 1j*wi*C)
     
     # f method:
-    np.testing.assert_equal(model.get_h_matrix(freq, frf_method="f"), np.fft.irfft(frf))
+    np.testing.assert_equal(model.get_IRF_matrix(freq, frf_method="f"), np.fft.irfft(frf))
     # s method:
-    np.testing.assert_allclose(model.get_h_matrix(freq, frf_method="s"), np.fft.irfft(frf), rtol=1e-5)
+    np.testing.assert_allclose(model.get_IRF_matrix(freq, frf_method="s"), np.fft.irfft(frf), rtol=1e-5)
     
     
 def test_response():

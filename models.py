@@ -349,7 +349,7 @@ class Model:
     def get_FRF_matrix(self, freq:np.ndarray, frf_method:str="f", 
                        **kwargs) -> np.ndarray:
         """
-        Get FRF matrix of the system.
+        Get FRF (frequency response function) matrix of the system.
 
         Parameters
         ----------
@@ -436,10 +436,10 @@ class Model:
         return FRF_matrix
     
 
-    def get_h_matrix(self, freq:np.ndarray, frf_method:str="f", return_t_axis:bool=False, 
+    def get_IRF_matrix(self, freq:np.ndarray, frf_method:str="f", return_t_axis:bool=False, 
                      **kwargs) -> np.ndarray | tuple[np.ndarray]:
         """
-        Get h (impulse response function) matrix of the system.
+        Get IRF (impulse response function) matrix of the system.
 
         Parameters
         ----------
@@ -460,7 +460,7 @@ class Model:
         Returns
         -------
         ndarray or tuple(ndarray)
-            Impulse response (h) matrix of shape ``(n_dof, n_dof, time_series)`` or tuple based on requested returns.
+            Impulse response function (IRF) matrix of shape ``(n_dof, n_dof, time_series)`` or tuple based on requested returns.
         """
         if isinstance(freq, list):
             freq = np.array(freq)
@@ -471,15 +471,15 @@ class Model:
         # get FRF matrix:
         FRF_matrix = self.get_FRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
 
-        # obtain h matrix (impulse response function) matrix:
-        h_matrix = np.fft.irfft(FRF_matrix)
+        # obtain IRF (impulse response function) matrix:
+        IRF_matrix = np.fft.irfft(FRF_matrix)
 
         if return_t_axis:
             T = 1/(freq[1] - freq[0])
-            t = np.linspace(0, T, h_matrix.shape[2], endpoint=False)
-            return h_matrix, t
+            t = np.linspace(0, T, IRF_matrix.shape[2], endpoint=False)
+            return IRF_matrix, t
 
-        return h_matrix
+        return IRF_matrix
 
 
     def get_response(self, exc_dof:np.ndarray|list, exc:np.ndarray, sampling_rate:int, 
@@ -509,7 +509,7 @@ class Model:
             Domain used for calculation: ``"f"`` - frequency domain multiplication (via FRF matrix) or
             ``"t"`` - time domain convolution (via impulse response matrix).
         return_matrix : bool, optional
-            True if you want to return the FRF matrix (``domain="f"``) or impulse response matrix (``domain="t"``)
+            True if you want to return the FRF matrix (``domain="f"``) or the IRF (``domain="t"``)
             used for calculation.
         return_t_axis : bool, optional
             True if you want to return the time axis.
@@ -592,7 +592,7 @@ class Model:
                 raise Exception("Wrong method type given. Can be one of %s" % _METHODS)
 
             resp = np.zeros((resp_dof.shape[0], exc.shape[1]), dtype=float)
-            matrix = self.get_h_matrix(freq, frf_method=frf_method, n_modes=n_modes)
+            matrix = self.get_IRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
             # calculate time domain response:
             for i in range(resp_dof.shape[0]):
                 for j in range(exc_dof.shape[0]):
@@ -731,7 +731,7 @@ class Model:
     
 
     # def get_response_t_domain(self, exc_dof, exc, sampling_rate, resp_dof=None, frf_method="f", mode="full", method="auto", 
-    #                           return_h=False, return_t_axis=False, return_f_axis=False):
+    #                           return_IRF=False, return_t_axis=False, return_f_axis=False):
     #     """
     #     Get response time series via convolution in time domain.
 
@@ -753,8 +753,8 @@ class Model:
     #     :type mode: str
     #     :param method: A string indicating which method to use to calculate the convolution (``"auto"``, ``"direct"``, ``"fft"``).
     #     :type method: str
-    #     :param return_h: True if you want to return the h (impulse reposnse function) matrix used for calculation.
-    #     :type return_h: bool
+    #     :param return_IRF: True if you want to return the h (impulse response function) matrix used for calculation.
+    #     :type return_IRF: bool
     #     :param return_t_axis: True if you want to return the time axis.
     #     :type return_t_axis: bool
     #     :param return_f_axis: True if you want to return the frequency axis.
@@ -796,34 +796,34 @@ class Model:
     #     if not isinstance(sampling_rate, int):
     #         raise Exception("Type int required for sampling_rate")
         
-    #     # obtain h matrix obtain h matrix:
+    #     # obtain IRF matrix:
     #     freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)  
     #     # TODO: normiranje
     #     resp = np.zeros((resp_dof.shape[0], exc.shape[1]), dtype=float)
-    #     h_matrix = self.get_h_matrix(freq, frf_method=frf_method)
+    #     IRF_matrix = self.get_IRF_matrix(freq, frf_method=frf_method)
 
     #     # calculate time domain response:
     #     for i in range(resp_dof.shape[0]):
     #         for j in range(exc_dof.shape[0]):
-    #             resp[i] += scipy.signal.convolve(h_matrix[resp_dof[i], exc_dof[j], :], exc[j], mode=mode, method=method)[:exc.shape[1]]
+    #             resp[i] += scipy.signal.convolve(IRF_matrix[resp_dof[i], exc_dof[j], :], exc[j], mode=mode, method=method)[:exc.shape[1]]
 
     #     if return_t_axis:
     #         T = 1/(freq[1] - freq[0])
     #         t = np.linspace(0, T, exc.shape[1], endpoint=False)
 
-    #     if return_h and return_t_axis and return_f_axis:
-    #         return resp, h_matrix, t, freq
-    #     elif return_h and return_t_axis:
-    #         return resp, h_matrix, t
-    #     elif return_h and return_f_axis:
-    #         return resp, h_matrix, freq
+    #     if return_IRF and return_t_axis and return_f_axis:
+    #         return resp, IRF_matrix, t, freq
+    #     elif return_IRF and return_t_axis:
+    #         return resp, IRF_matrix, t
+    #     elif return_IRF and return_f_axis:
+    #         return resp, IRF_matrix, freq
     #     elif return_t_axis and return_f_axis:
     #         return resp, t, freq
     #     elif return_t_axis:
     #         return resp, t
     #     elif return_f_axis:
     #         return resp, freq
-    #     elif return_h:
-    #         return resp, h_matrix
+    #     elif return_IRF:
+    #         return resp, IRF_matrix
     #     else:
     #         return resp

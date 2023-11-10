@@ -156,7 +156,7 @@ To get the FRF matrix of the system we call the following method:
 
 .. code:: python
 
-  FRF_matrix = a.get_FRF_matrix(freq, frf_method="f", **kwargs)
+  frf_matrix = a.get_FRF_matrix(freq, frf_method="f", **kwargs)
 
 ``freq`` argument
 ~~~~~~~~~~~~~~~~~
@@ -176,11 +176,11 @@ Method used to calculate the FRF matrix:
 Impulse response functions
 ----------------------------
 
-To get the impulse response (h) matrix of the system we call the following method:
+To get the impulse response function (IRF) matrix of the system we call the following method:
 
 .. code:: python
 
-  h_matrix = a.get_h_matrix(freq, frf_method="f", return_t_axis=False, **kwargs)
+  irf_matrix = a.get_IRF_matrix(freq, frf_method="f", return_t_axis=False, **kwargs)
 
 ``freq`` argument
 ~~~~~~~~~~~~~~~~~
@@ -188,7 +188,7 @@ Frequency array (in Hz) at which the FRF values are calculated.
 
 ``frf_method`` argument
 ~~~~~~~~~~~~~~~~~~~~~~~
-Method used to calculate the FRF matrix, from which the impulse response functions matrix is caluclated via inverse FFT:
+Method used to calculate the FRF matrix, from which the impulse response function matrix is caluclated via inverse FFT:
 
   * ``"f"`` (default): frequency domain, via impedance inverse.
   * ``"s"``: state space domain, via state-space model parameters.
@@ -202,7 +202,7 @@ Method used to calculate the FRF matrix, from which the impulse response functio
 If ``True``, returns the time axis of impulse response functions.
 
 .. note::
-  If ``True`` the method returns a tuple with two elements: ``(h_matrix, time_series)``.
+  If ``True`` the method returns a tuple with two elements: ``(irf_matrix, time_series)``.
 
 
 Obtaining systems response
@@ -267,7 +267,7 @@ Method used to calculate the FRF matrix:
 ``return_matrix`` argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 If ``True``, returns the matrix that was used to calculate the reponse - FRF matrix (``domain="f"``) or 
-impulse response matrix (``domain="t"``).
+impulse response function matrix (``domain="t"``).
 
 ``return_t_axis`` argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

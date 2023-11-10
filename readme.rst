@@ -35,14 +35,14 @@ There are several methods available for different system properties:
     eig_vec = a.get_eig_vec()
     d_ratios = a.get_damping_ratios()
 
-Obtaining FRFs and impulse response functions:
+Obtaining frequency response functions and impulse response functions:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To obtain the FRF matrix and the impulse reponse functions matrix we use the following methods:
+To obtain the FRF (frequency response function) matrix and the IRF (impulse reponse function) matrix we use the following methods:
 
 .. code:: python
 
     FRF_matrix = a.get_FRF_matrix(freq)
-    h_matrix = a.get_h_matrix(freq)
+    IRF_matrix = a.get_IRF_matrix(freq)
 
 Calculating response:
 ~~~~~~~~~~~~~~~~~~~~~
