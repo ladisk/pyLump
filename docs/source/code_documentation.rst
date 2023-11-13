@@ -6,5 +6,5 @@ Code documentation
 The ``Model`` class
 -------------------
 
-.. autoclass:: models.Model
+.. autoclass:: pylump.Model
     :members:

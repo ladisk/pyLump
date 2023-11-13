@@ -6,11 +6,11 @@ For a more detailed use with real examples visit the :doc:`showcase <Showcase>` 
 
 Installation
 ------------
-To use Models, first install it using pip:
+To use pylump, first install it using pip:
 
 .. code-block:: console
 
-   $ pip install .....
+   $ pip install pylump
 
 Instance of the ``Model`` class
 -------------------------------
@@ -18,7 +18,7 @@ We start by creating the Model object the following way:
 
 .. code:: python
 
-    a = models.Model(   # TODO
+    a = pylump.Model(
         n_dof,
         mass,
         stiffness,

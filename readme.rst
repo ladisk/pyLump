@@ -1,11 +1,11 @@
-models ?????
+pylump
 ======
 
 Multi Degree of Freedom Models (mass-spring-damper).
 ----------------------------------------------------
-For more information check out the showcase examples and see documentation_. SPREMENI LINK
+For more information check out the showcase examples and see documentation_.
 
-Basic ``models???`` usage:
+Basic ``pylump`` usage:
 --------------------------
 
 Make an instance of the ``Model`` class:
@@ -13,7 +13,7 @@ Make an instance of the ``Model`` class:
 
 .. code:: python
 
-    a = models.Model(   # TODO
+    a = pyklump.Model(
         n_dof,
         mass,
         stiffness,

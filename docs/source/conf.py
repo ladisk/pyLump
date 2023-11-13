@@ -19,7 +19,7 @@ sys.setrecursionlimit(1500)
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Models'
+project = 'pylump'
 copyright = '2023, Ladisk'
 author = 'Ladisk'
 
