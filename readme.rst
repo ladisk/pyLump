@@ -13,7 +13,7 @@ Make an instance of the ``Model`` class:
 
 .. code:: python
 
-    a = pyklump.Model(
+    a = pylump.Model(
         n_dof,
         mass,
         stiffness,
