@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyLump"
-version = "0.1.1"
+version = "0.1.0"
 authors = [{name = "Luka Novak, Domen Gorjup, Janko Slavič", email = "janko.slavic@fs.uni-lj.si"}]
 maintainers = [{name = "Luka Novak, Domen Gorjup, Janko Slavič", email = "klemen.zaletelj@fs.uni-lj.si"}]
 license = "MIT"
