@@ -1,11 +1,11 @@
-pylump
+pyLump
 ======
 
 Multi Degree of Freedom (mass-spring-damper) Models.
 ----------------------------------------------------
 For more information check out the showcase examples and see documentation_.
 
-Basic ``pylump`` usage:
+Basic ``pyLump`` usage:
 --------------------------
 
 Make an instance of the ``Model`` class:
@@ -13,7 +13,7 @@ Make an instance of the ``Model`` class:
 
 .. code:: python
 
-    a = pylump.Model(
+    a = pyLump.Model(
         n_dof,
         mass,
         stiffness,
@@ -57,4 +57,4 @@ We can calculate the systems response based on known excitation the following wa
         resp_dof
     )
 
-.. _documentation: https://pylump.readthedocs.io/en/latest/
+.. _documentation: https://pyLump.readthedocs.io/en/latest/

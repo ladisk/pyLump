@@ -1,5 +1,5 @@
 """
-Unit tests for pylump.py
+Unit tests for pyLump.py
 """
 
 import numpy as np
@@ -9,12 +9,12 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import pylump
+import pyLump
 
 
 def test_matrices():
     # both:
-    model = pylump.Model(3, 1, 1, 1, boundaries="both")
+    model = pyLump.Model(3, 1, 1, 1, boundaries="both")
 
     M = np.array([[1, 0, 0],
                   [0, 1, 0],
@@ -33,7 +33,7 @@ def test_matrices():
     np.testing.assert_equal(model.get_damping_matrix(), C)
 
     # left
-    model = pylump.Model(3, 1, 1, 1, boundaries="left")
+    model = pyLump.Model(3, 1, 1, 1, boundaries="left")
 
     M = np.array([[1, 0, 0],
                   [0, 1, 0],
@@ -52,7 +52,7 @@ def test_matrices():
     np.testing.assert_equal(model.get_damping_matrix(), C)
 
     # right:
-    model = pylump.Model(3, 1, 1, 1, boundaries="right")
+    model = pyLump.Model(3, 1, 1, 1, boundaries="right")
 
     M = np.array([[1, 0, 0],
                   [0, 1, 0],
@@ -71,7 +71,7 @@ def test_matrices():
     np.testing.assert_equal(model.get_damping_matrix(), C)
 
     # free
-    model = pylump.Model(3, 1, 1, 1, boundaries="free")
+    model = pyLump.Model(3, 1, 1, 1, boundaries="free")
 
     M = np.array([[1, 0, 0],
                   [0, 1, 0],
@@ -91,7 +91,7 @@ def test_matrices():
 
 
 def test_FRF():
-    model = pylump.Model(3, 1, 1, 1, boundaries="both")
+    model = pyLump.Model(3, 1, 1, 1, boundaries="both")
 
     M = np.array([[1, 0, 0],
                   [0, 1, 0],
@@ -120,7 +120,7 @@ def test_FRF():
 
 
 def test_h():
-    model = pylump.Model(3, 1, 1, 1, boundaries="both")
+    model = pyLump.Model(3, 1, 1, 1, boundaries="both")
 
     M = np.array([[1, 0, 0],
                   [0, 1, 0],
@@ -149,7 +149,7 @@ def test_h():
     
     
 def test_response():
-    model = pylump.Model(3, 0.1, 10, 0.01, boundaries="both")
+    model = pyLump.Model(3, 0.1, 10, 0.01, boundaries="both")
 
     M = np.array([[0.1, 0, 0],
                   [0, 0.1, 0],

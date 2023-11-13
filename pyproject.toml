@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pylump"
-version = "0.1.0"
+name = "pyLump"
+version = "0.1.1"
 authors = [{name = "Luka Novak, Domen Gorjup, Janko Slavič", email = "janko.slavic@fs.uni-lj.si"}]
 maintainers = [{name = "Luka Novak, Domen Gorjup, Janko Slavič", email = "klemen.zaletelj@fs.uni-lj.si"}]
 license = "MIT"
@@ -44,6 +44,6 @@ dev = [
 ]
 
 [project.urls]
-homepage = "https://github.com/ladisk/pylump"
-documentation = "https://pylump.readthedocs.io/en/latest/"
-source = "https://github.com/ladisk/pylump"
+homepage = "https://github.com/ladisk/pyLump"
+documentation = "https://pyLump.readthedocs.io/en/latest/"
+source = "https://github.com/ladisk/pyLump"
