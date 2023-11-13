@@ -18,4 +18,4 @@ Check out the :doc:`tutorial <tutorial>` section for further information.
    code_documentation
 
 
-.. _source: LINK
+.. _source: https://github.com/ladisk/pylump

@@ -1,7 +1,7 @@
 pylump
 ======
 
-Multi Degree of Freedom Models (mass-spring-damper).
+Multi Degree of Freedom (mass-spring-damper) Models.
 ----------------------------------------------------
 For more information check out the showcase examples and see documentation_.
 
@@ -57,4 +57,4 @@ We can calculate the systems response based on known excitation the following wa
         resp_dof
     )
 
-.. _documentation: https://pyfrf.readthedocs.io/en/latest/
+.. _documentation: https://pylump.readthedocs.io/en/latest/

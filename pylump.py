@@ -14,7 +14,7 @@ import scipy
 
 
 
-__version__ = "0.1"  # TODO ???
+__version__ = "0.1.0"
 _BOUNDARIES = ["free", "both", "left", "right"]
 _FRF_METHODS = ["f", "s"]
 _MODES = ["full", "valid", "same"]
