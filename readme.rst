@@ -36,7 +36,7 @@ There are several methods available for different system properties:
     d_ratios = a.get_damping_ratios()
 
 Obtaining frequency response functions and impulse response functions:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To obtain the FRF (frequency response function) matrix and the IRF (impulse reponse function) matrix we use the following methods:
 
 .. code:: python
