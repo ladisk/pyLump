@@ -168,7 +168,9 @@ def test_response():
     exc[0] = 1
     sampling_rate=10
 
-    freq = np.fft.rfftfreq(1000, 1/sampling_rate)
+    len_freq = exc.shape[0] // 2 + 1  # number of data points of frequency vector
+    freq = np.arange(1, len_freq+1, 1) * (sampling_rate / exc.shape[0])  # avoid zero frequency
+    #freq = np.fft.rfftfreq(1000, 1/sampling_rate)
     w = 2*np.pi*freq
 
     frf = np.zeros([3, 3, len(freq)], dtype="complex128")
