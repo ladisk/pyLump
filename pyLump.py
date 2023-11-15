@@ -565,7 +565,9 @@ class Model:
             raise Exception("Type int required for sampling_rate")
 
         # freq array:
-        freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)
+        len_freq = exc.shape[1] // 2 + 1  # number of data points of frequency vector
+        freq = np.arange(1, len_freq+1, 1) * (sampling_rate / exc.shape[1])  # avoid zero frequency
+        #freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)  # old
 
         # # n_modes kwarg:
         n_modes = kwargs.get("n_modes", None)
