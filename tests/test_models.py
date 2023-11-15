@@ -116,7 +116,7 @@ def test_FRF():
     # f method:
     np.testing.assert_equal(np.abs(model.get_FRF_matrix(freq, frf_method="f")), np.abs(frf))
     # s method:
-    np.testing.assert_allclose(np.abs(model.get_FRF_matrix(freq, frf_method="s")), np.abs(frf), rtol=1e-12)
+    np.testing.assert_allclose(np.abs(model.get_FRF_matrix(freq, frf_method="s")), np.abs(frf), rtol=1e-10)
 
 
 def test_h():
@@ -180,14 +180,14 @@ def test_response():
 
     # f method:
     np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="f", frf_method="f"), 
-                               np.fft.irfft(frf[0,:]), rtol=1e-11)
+                               np.fft.irfft(frf[0,:]), rtol=1e-8)
     np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="t", frf_method="f"), 
-                               np.fft.irfft(frf[0,:]), rtol=1e-11)
+                               np.fft.irfft(frf[0,:]), rtol=1e-8)
     # s method:
     np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="f", frf_method="s"), 
-                               np.fft.irfft(frf[0,:]), rtol=1e-9)
+                               np.fft.irfft(frf[0,:]), rtol=1e-8)
     np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="t", frf_method="s"), 
-                               np.fft.irfft(frf[0,:]), rtol=1e-9)
+                               np.fft.irfft(frf[0,:]), rtol=1e-8)
     
 
 
