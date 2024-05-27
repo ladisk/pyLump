@@ -482,8 +482,8 @@ class Model:
         return IRF_matrix
 
 
-    def get_response(self, exc_dof:np.ndarray|list, exc:np.ndarray, sampling_rate:int, 
-                     resp_dof:np.ndarray=None, domain:str="f", frf_method:str="f", 
+    def get_response(self, exc_dof:np.ndarray|list|int, exc:np.ndarray, sampling_rate:int, 
+                     resp_dof:np.ndarray|int=None, domain:str="f", frf_method:str="f", 
                      return_matrix:bool=False, return_t_axis:bool=False, return_f_axis:bool=False, 
                      **kwargs) -> np.ndarray|tuple[np.ndarray]:
         """
@@ -491,7 +491,7 @@ class Model:
 
         Parameters
         ----------
-        exc_dof : ndarray, list
+        exc_dof : ndarray, list, int
             Degrees of freedom (masses) where the system is excited.
         exc : ndarray
             Excitation time array 1D (one excitation DOF) or 2D (multiple excitation DOFs).
@@ -499,7 +499,7 @@ class Model:
             2D shape (multiple excitation DOFs): (number of DOFs, time series)
         sampling_rate : int
             Sampling rate of excitation time signals.
-        resp_dof : ndarray, list, optional
+        resp_dof : ndarray, list, int, optional
             Degrees of freedom (masses) where the response is calculated. If None - responses of all masses are caluclated.
         frf_method : str, optional
             Method of calculating the FRF matrix:
@@ -540,6 +540,8 @@ class Model:
         # check exc_dof:
         if isinstance(exc_dof, list):
             exc_dof = np.array(exc_dof)
+        elif isinstance(exc_dof, int):
+            exc_dof = np.array([exc_dof])
         if len(exc_dof.shape) > 1:
             raise Exception("Multiple dimension array not allowed for exc_dof array")
         
@@ -547,6 +549,8 @@ class Model:
         if resp_dof is not None:
             if isinstance(resp_dof, list):
                 resp_dof = np.array(resp_dof)
+            elif isinstance(resp_dof, int):
+                resp_dof = np.array([resp_dof])
             if len(resp_dof.shape) > 1:
                 raise Exception("Multiple dimension array not allowed for resp_dof array")
         else:  # all rsponse DOFs are calculated
