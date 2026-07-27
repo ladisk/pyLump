@@ -568,12 +568,12 @@ class Model:
         if not isinstance(sampling_rate, int):
             raise Exception("Type int required for sampling_rate")
 
-        # freq array:
-        len_freq = exc.shape[1] // 2 + 1  # number of data points of frequency vector
-        freq = np.arange(1, len_freq+1, 1) * (sampling_rate / exc.shape[1])  # avoid zero frequency
-        #freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)  # old
+        # freq array: the rfft bins of the excitation, including the 0 Hz
+        # (rigid-body / static) term. The previous vector started one bin above 0,
+        # which shifted the whole FRF by one bin relative to get_FRF_matrix.
+        freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)
 
-        # # n_modes kwarg:
+        # n_modes kwarg:
         n_modes = kwargs.get("n_modes", None)
 
         # calcualte response:
