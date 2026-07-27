@@ -168,9 +168,7 @@ def test_response():
     exc[0] = 1
     sampling_rate=10
 
-    len_freq = exc.shape[0] // 2 + 1  # number of data points of frequency vector
-    freq = np.arange(1, len_freq+1, 1) * (sampling_rate / exc.shape[0])  # avoid zero frequency
-    #freq = np.fft.rfftfreq(1000, 1/sampling_rate)
+    freq = np.fft.rfftfreq(exc.shape[0], 1/sampling_rate)  # aligned with rfft(exc), incl. 0 Hz
     w = 2*np.pi*freq
 
     frf = np.zeros([3, 3, len(freq)], dtype="complex128")
@@ -178,16 +176,22 @@ def test_response():
     for i, wi in enumerate(w):
         frf[:,:,i] = scipy.linalg.inv(K - wi**2 * M + 1j*wi*C)
 
+    ref = np.fft.irfft(frf[0,:])
+
+    # Exclude the 0 Hz (rigid-body / static) bin from the comparison: subtracting the
+    # time-domain mean zeros exactly the DC bin and leaves all other bins unchanged.
+    demean = lambda x: x - x.mean(axis=-1, keepdims=True)
+
     # f method:
-    np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="f", frf_method="f"), 
-                               np.fft.irfft(frf[0,:]), rtol=1e-8)
-    np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="t", frf_method="f"), 
-                               np.fft.irfft(frf[0,:]), rtol=1e-8)
+    np.testing.assert_allclose(demean(model.get_response(exc_dof, exc, sampling_rate, domain="f", frf_method="f")),
+                               demean(ref), rtol=1e-8)
+    np.testing.assert_allclose(demean(model.get_response(exc_dof, exc, sampling_rate, domain="t", frf_method="f")),
+                               demean(ref), rtol=1e-8)
     # s method:
-    np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="f", frf_method="s"), 
-                               np.fft.irfft(frf[0,:]), rtol=1e-8)
-    np.testing.assert_allclose(model.get_response(exc_dof, exc, sampling_rate, domain="t", frf_method="s"), 
-                               np.fft.irfft(frf[0,:]), rtol=1e-8)
+    np.testing.assert_allclose(demean(model.get_response(exc_dof, exc, sampling_rate, domain="f", frf_method="s")),
+                               demean(ref), rtol=1e-8)
+    np.testing.assert_allclose(demean(model.get_response(exc_dof, exc, sampling_rate, domain="t", frf_method="s")),
+                               demean(ref), rtol=1e-8)
     
 
 

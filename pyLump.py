@@ -568,19 +568,30 @@ class Model:
         if not isinstance(sampling_rate, int):
             raise Exception("Type int required for sampling_rate")
 
-        # freq array:
-        len_freq = exc.shape[1] // 2 + 1  # number of data points of frequency vector
-        freq = np.arange(1, len_freq+1, 1) * (sampling_rate / exc.shape[1])  # avoid zero frequency
-        #freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)  # old
+        # freq array: the rfft bins of the excitation, including the 0 Hz
+        # (rigid-body / static) term. The previous vector started one bin above 0,
+        # which shifted the whole FRF by one bin relative to get_FRF_matrix.
+        freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)
 
-        # # n_modes kwarg:
+        # n_modes kwarg:
         n_modes = kwargs.get("n_modes", None)
+
+        # FRF matrix at the rfft frequencies. The 0 Hz (rigid-body / static) term is
+        # singular for unconstrained systems: compute it where it is defined, and leave
+        # it at zero where the impedance matrix is singular, so get_response never fails
+        # at 0 Hz.
+        frf_matrix = np.zeros((self.n_dof, self.n_dof, freq.shape[0]), dtype="complex128")
+        frf_matrix[:, :, 1:] = self.get_FRF_matrix(freq[1:], frf_method=frf_method, n_modes=n_modes)
+        try:
+            frf_matrix[:, :, :1] = self.get_FRF_matrix(freq[:1], frf_method=frf_method, n_modes=n_modes)
+        except np.linalg.LinAlgError:
+            pass  # 0 Hz term undefined for unconstrained (rigid-body) systems
 
         # calcualte response:
         if domain == "f":
             EXC = np.fft.rfft(exc)  # TODO: normiranje
             RESP = np.zeros((resp_dof.shape[0], freq.shape[0]), dtype="complex128")
-            matrix = self.get_FRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
+            matrix = frf_matrix
             # calculate response in frequency domain:
             for i in range(EXC.shape[1]):
                 RESP[:,i] = matrix[:,:,i][np.ix_(resp_dof, exc_dof)] @ EXC[:,i]
@@ -598,7 +609,7 @@ class Model:
                 raise Exception("Wrong method type given. Can be one of %s" % _METHODS)
 
             resp = np.zeros((resp_dof.shape[0], exc.shape[1]), dtype=float)
-            matrix = self.get_IRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
+            matrix = np.fft.irfft(frf_matrix)  # IRF matrix (0 Hz handled as above)
             # calculate time domain response:
             for i in range(resp_dof.shape[0]):
                 for j in range(exc_dof.shape[0]):
