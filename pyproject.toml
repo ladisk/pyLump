@@ -11,7 +11,7 @@ license = "MIT"
 description = "Multi Degree of Freedom (mass-spring-damper) Models."
 readme = "readme.rst"
 keywords = ["lumped mass", "MDOF", "dynamics"]
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 
 dependencies = [
     "numpy>=1.11.0",
@@ -25,7 +25,9 @@ classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Topic :: Scientific/Engineering',
-    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+    'Programming Language :: Python :: 3.15',
     "License :: OSI Approved :: MIT License",
 ]
 
