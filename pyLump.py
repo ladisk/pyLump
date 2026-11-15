@@ -482,6 +482,25 @@ class Model:
         return IRF_matrix
 
 
+    def _get_FRF_matrix_rfft(self, freq:np.ndarray, frf_method:str="f", 
+                             n_modes:int=None) -> np.ndarray:
+        """
+        FRF matrix on an ``np.fft.rfftfreq`` frequency array, used for response synthesis.
+
+        The FRF matrix is evaluated exactly on ``freq``, so that bin ``k`` corresponds 
+        to bin ``k`` of ``np.fft.rfft`` of the excitation. If the stiffness matrix is 
+        singular (rigid body modes, e.g. ``boundaries="free"``), the static (zero frequency) 
+        FRF is not finite; in this case the zero frequency bin is set to 0, which gives 
+        a response with zero mean value.
+        """
+        if freq[0] == 0 and np.linalg.matrix_rank(self.K) < self.n_dof:
+            FRF_matrix = np.zeros([self.n_dof, self.n_dof, len(freq)], dtype="complex128")
+            FRF_matrix[:, :, 1:] = self.get_FRF_matrix(freq[1:], frf_method=frf_method, n_modes=n_modes)
+        else:
+            FRF_matrix = self.get_FRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
+        return FRF_matrix
+
+
     def get_response(self, exc_dof:np.ndarray|list|int, exc:np.ndarray, sampling_rate:int, 
                      resp_dof:np.ndarray|int=None, domain:str="f", frf_method:str="f", 
                      return_matrix:bool=False, return_t_axis:bool=False, return_f_axis:bool=False, 
@@ -514,7 +533,11 @@ class Model:
         return_t_axis : bool, optional
             True if you want to return the time axis.
         return_f_axis : bool, optional
-            True if you want to return the frequency axis.
+            True if you want to return the frequency axis. It is equal to 
+            ``np.fft.rfftfreq(exc.shape[-1], 1/sampling_rate)``; the returned FRF matrix 
+            (``domain="f"``) is the same as ``get_FRF_matrix`` on this frequency axis. 
+            If the stiffness matrix is singular (e.g. ``boundaries="free"``), the zero 
+            frequency bin of the FRF matrix is set to 0.
 
         Keyword arguments
         -----------------
@@ -568,24 +591,26 @@ class Model:
         if not isinstance(sampling_rate, int):
             raise Exception("Type int required for sampling_rate")
 
-        # freq array:
-        len_freq = exc.shape[1] // 2 + 1  # number of data points of frequency vector
-        freq = np.arange(1, len_freq+1, 1) * (sampling_rate / exc.shape[1])  # avoid zero frequency
-        #freq = np.fft.rfftfreq(exc.shape[1], 1/sampling_rate)  # old
+        # freq array (the same bins as np.fft.rfft of the excitation):
+        n_samples = exc.shape[1]
+        freq = np.fft.rfftfreq(n_samples, 1/sampling_rate)
 
         # # n_modes kwarg:
         n_modes = kwargs.get("n_modes", None)
+
+        # FRF matrix on the rfft frequency bins:
+        FRF_matrix = self._get_FRF_matrix_rfft(freq, frf_method=frf_method, n_modes=n_modes)
 
         # calcualte response:
         if domain == "f":
             EXC = np.fft.rfft(exc)  # TODO: normiranje
             RESP = np.zeros((resp_dof.shape[0], freq.shape[0]), dtype="complex128")
-            matrix = self.get_FRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
+            matrix = FRF_matrix
             # calculate response in frequency domain:
             for i in range(EXC.shape[1]):
                 RESP[:,i] = matrix[:,:,i][np.ix_(resp_dof, exc_dof)] @ EXC[:,i]
             # back to time domain:
-            resp = np.fft.irfft(RESP)  # TODO: normiranje
+            resp = np.fft.irfft(RESP, n=n_samples)  # TODO: normiranje
 
         elif domain == "t":
             # check mode and method:
@@ -598,7 +623,7 @@ class Model:
                 raise Exception("Wrong method type given. Can be one of %s" % _METHODS)
 
             resp = np.zeros((resp_dof.shape[0], exc.shape[1]), dtype=float)
-            matrix = self.get_IRF_matrix(freq, frf_method=frf_method, n_modes=n_modes)
+            matrix = np.fft.irfft(FRF_matrix, n=n_samples)
             # calculate time domain response:
             for i in range(resp_dof.shape[0]):
                 for j in range(exc_dof.shape[0]):
