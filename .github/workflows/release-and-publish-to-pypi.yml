@@ -6,23 +6,36 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # trusted publishing (OIDC)
+      contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      - name: Install dependencies
-        run: pip install setuptools wheel twine build
+      - name: Check that the tag matches the package version
+        run: |
+          python - <<'PY'
+          import os, re, sys, tomllib
+          tag = os.environ["GITHUB_REF_NAME"]
+          with open("pyproject.toml", "rb") as f:
+              version = tomllib.load(f)["project"]["version"]
+          with open("pyLump.py") as f:
+              module_version = re.search(r'^__version__ = "(.+)"', f.read(), re.M).group(1)
+          print(f"tag={tag} pyproject={version} __version__={module_version}")
+          if tag != f"v{version}" or module_version != version:
+              sys.exit("Tag, pyproject.toml version and pyLump.__version__ must match.")
+          PY
 
       - name: Build package
-        run: python -m build
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.14.3
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@release/v1
